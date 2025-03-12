@@ -196,9 +196,15 @@ vim.keymap.set("n", "<C-l>", "<C-w><C-l>", { desc = "Move focus to the right win
 vim.keymap.set("n", "<C-j>", "<C-w><C-j>", { desc = "Move focus to the lower window" })
 vim.keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move focus to the upper window" })
 
--- Keymap for jumping 10 tiles below
+-- jk: Keymap for jumping 10 tiles below
 vim.keymap.set("n", "<CS-j>", "10j")
 vim.keymap.set("n", "<CS-k>", "10k")
+
+-- jk: replace from registry
+vim.keymap.set("v", "<CS-p>", '"adp')
+
+-- jk: When diagnostic cover each other use this to display them in different list
+vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, { noremap = true, silent = true })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -256,11 +262,6 @@ require("lazy").setup({
 			opts = {
 				disabled_filetypes = { "text", "markdown" },
 			},
-		},
-		{
-			"m4xshen/hardtime.nvim",
-			dependencies = { "MunifTanjim/nui.nvim" },
-			opts = {},
 		},
 	},
 
@@ -606,7 +607,11 @@ require("lazy").setup({
 				pyright = {},
 				gitlab_ci_ls = {},
 				clangd = {},
-				-- rust_analyzer = {},
+				elixirls = {
+					cmd = { "/Users/jkaczmarski/.elixir-ls/language_server.sh" },
+					filetypes = { "elixir", "eelixir", "heex", "surface" },
+				},
+				rust_analyzer = {},
 				-- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
 				--
 				-- Some languages (like typescript) have entire language plugins that can be useful:

@@ -83,6 +83,10 @@ I hope you enjoy your Neovim journey,
 
 P.S. You can delete this when you're done too. It's your config now! :)
 --]]
+--
+
+-- jk: includes relevant function from getting info from pyproject.toml files
+local formatters = require("custom.formatters")
 
 -- Set <space> as the leader key
 -- See `:help mapleader`
@@ -263,8 +267,14 @@ require("lazy").setup({
 				disabled_filetypes = { "text", "markdown" },
 			},
 		},
+		{
+			"jose-elias-alvarez/null-ls.nvim",
+			dependencies = { "nvim-lua/plenary.nvim" },
+			config = function()
+				require("null-ls").setup()
+			end,
+		},
 	},
-
 	-- Here is a more advanced example where we pass configuration
 	-- options to `gitsigns.nvim`. This is equivalent to the following Lua:
 	--    require('gitsigns').setup({ ... })
@@ -605,13 +615,17 @@ require("lazy").setup({
 				gopls = {},
 				hls = {},
 				pyright = {},
-				gitlab_ci_ls = {},
+				gitlab_ci_ls = {
+					pattern = "*gitlab-ci*.{yml,yaml}",
+				},
 				clangd = {},
 				elixirls = {
 					cmd = { "/Users/jkaczmarski/.elixir-ls/language_server.sh" },
 					filetypes = { "elixir", "eelixir", "heex", "surface" },
 				},
 				rust_analyzer = {},
+				docker_compose_language_service = {},
+				dockerls = {},
 				-- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
 				--
 				-- Some languages (like typescript) have entire language plugins that can be useful:
@@ -697,12 +711,40 @@ require("lazy").setup({
 			formatters_by_ft = {
 				lua = { "stylua" },
 				-- Conform can also run multiple formatters sequentially
-				-- python = { "isort", "black" },
+				python = { unpack(formatters.get_formatters_from_pyproject()) },
 				--
 				-- You can use 'stop_after_first' to run the first available formatter from the list
 				-- javascript = { "prettierd", "prettier", stop_after_first = true },
 			},
 		},
+	},
+
+	{ -- Linting
+		"mfussenegger/nvim-lint",
+		event = { "BufWritePost" },
+		cmd = { "LintInfo" },
+		keys = {
+			{
+				"<leader>l",
+				function()
+					require("lint").try_lint()
+				end,
+				mode = "",
+				desc = "[L]int buffer",
+			},
+		},
+		config = function()
+			require("lint").linters_by_ft = {
+				python = { unpack(formatters.get_linters_from_pyproject()) },
+			}
+
+			-- Automatically trigger linting on save, buffer read, and insert leave
+			vim.api.nvim_create_autocmd({ "BufWritePost", "BufReadPost", "InsertLeave" }, {
+				callback = function()
+					require("lint").try_lint()
+				end,
+			})
+		end,
 	},
 
 	{ -- Autocompletion

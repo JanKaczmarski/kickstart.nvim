@@ -616,7 +616,19 @@ require("lazy").setup({
 				hls = {},
 				pyright = {},
 				gitlab_ci_ls = {
-					pattern = "*gitlab-ci*.{yml,yaml}",
+					filetypes = { "yaml.gitlab" },
+				},
+				yamlls = {
+					format = {
+						enable = true,
+					},
+					schemas = {
+						{
+							["yaml.gitlab"] = "https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/assets/javascripts/editor/schema/ci.json",
+						},
+					},
+					validate = true,
+					completion = true,
 				},
 				clangd = {},
 				elixirls = {
@@ -650,6 +662,13 @@ require("lazy").setup({
 					},
 				},
 			}
+
+			vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+				pattern = "*.gitlab-ci*.{yml,yaml}",
+				callback = function()
+					vim.bo.filetype = "yaml.gitlab"
+				end,
+			})
 
 			-- Ensure the servers and tools above are installed
 			--  To check the current status of installed tools and/or manually install

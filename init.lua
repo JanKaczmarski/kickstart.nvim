@@ -85,9 +85,6 @@ P.S. You can delete this when you're done too. It's your config now! :)
 --]]
 --
 
--- jk: includes relevant function from getting info from pyproject.toml files
-local formatters = require("custom.formatters")
-
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
@@ -250,8 +247,8 @@ vim.opt.rtp:prepend(lazypath)
 -- NOTE: Here is where you install your plugins.
 require("lazy").setup({
 	-- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
-	"tpope/vim-sleuth", -- Detect tabstop and shiftwidth automatically
 	"fatih/vim-go",
+	"tpope/vim-sleuth", -- Detect tabstop and shiftwidth automatically
 
 	-- NOTE: Plugins can also be added by using a table,
 	-- with the first argument being the link and the following
@@ -273,6 +270,12 @@ require("lazy").setup({
 			config = function()
 				require("null-ls").setup()
 			end,
+		},
+		{
+			"ray-x/lsp_signature.nvim",
+			keymaps = {
+				move_signature_window_key = { "K" }, -- Bind Shift + K to move the floating window
+			},
 		},
 	},
 	-- Here is a more advanced example where we pass configuration
@@ -612,7 +615,19 @@ require("lazy").setup({
 			--        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
 			local servers = {
 				-- clangd = {},
-				gopls = {},
+				gopls = {
+					settings = {
+						gopls = {
+							buildFlags = { "-tags=integration,unit" },
+						},
+					},
+				},
+				golangci_lint_ls = {
+					filetypes = { "go" },
+					init_options = {
+						command = { "golangci-lint", "run", "--output.json.path=stdout", "--show-stats=false" },
+					},
+				},
 				hls = {},
 				pyright = {},
 				gitlab_ci_ls = {
@@ -730,10 +745,15 @@ require("lazy").setup({
 			formatters_by_ft = {
 				lua = { "stylua" },
 				-- Conform can also run multiple formatters sequentially
-				python = { unpack(formatters.get_formatters_from_pyproject()) },
+				python = { "black", "isort" },
 				--
 				-- You can use 'stop_after_first' to run the first available formatter from the list
 				-- javascript = { "prettierd", "prettier", stop_after_first = true },
+			},
+			formatters = {
+				black = {
+					prepend_args = { "--line-length", "120" },
+				},
 			},
 		},
 	},
@@ -754,11 +774,13 @@ require("lazy").setup({
 		},
 		config = function()
 			require("lint").linters_by_ft = {
-				python = { unpack(formatters.get_linters_from_pyproject()) },
+				python = { "ruff" },
 			}
 
+			require("lint").linters.ruff.args = { "--max-line-length", "120" }
+
 			-- Automatically trigger linting on save, buffer read, and insert leave
-			vim.api.nvim_create_autocmd({ "BufWritePost", "BufReadPost", "InsertLeave" }, {
+			vim.api.nvim_create_autocmd({ "BufWritePost", "BufReadPost" }, {
 				callback = function()
 					require("lint").try_lint()
 				end,

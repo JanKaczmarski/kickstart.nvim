@@ -7,7 +7,35 @@ return {
 			disabled_filetypes = { "text", "markdown" },
 		},
 	},
-
+	{
+		"iamcco/markdown-preview.nvim",
+		cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
+		keys = {
+			{
+				"<leader>mp",
+				"<cmd>MarkdownPreview<CR>",
+				mode = { "n", "i" },
+				desc = "Markdown [P]review",
+			},
+			{
+				"<leader>ms",
+				"<cmd>MarkdownPreviewStop<CR>",
+				mode = { "n", "i" },
+				desc = "Markdown Preview [S]top",
+			},
+			{
+				"<leader>mt",
+				"<cmd>MarkdownPreviewToggle<CR>",
+				mode = { "n", "i" },
+				desc = "Markdown Preview [T]oggle",
+			},
+		},
+		build = "cd app && yarn install",
+		init = function()
+			vim.g.mkdp_filetypes = { "markdown" }
+		end,
+		ft = { "markdown" },
+	},
 	{ -- Collection of various small independent plugins/modules
 		"echasnovski/mini.nvim",
 		config = function()

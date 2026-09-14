@@ -1,6 +1,8 @@
 return {
 	"nvim-treesitter/nvim-treesitter",
-	branch = "main",
+	-- NOTE: master is fixed for 0.11 nvim verison compatibility
+	-- when upgraing to nvim 0.12+ please use main branch
+	branch = "master",
 	lazy = false,
 	build = ":TSUpdate",
 	opts = {
@@ -22,13 +24,14 @@ return {
 			"vim",
 			"vimdoc",
 		},
+		highlight = {
+			enable = true,
+		},
 	},
 	config = function(_, opts)
-		local treesitter = require("nvim-treesitter")
-		local install_dir = vim.fn.stdpath("data") .. "/site"
+		local configs = require("nvim-treesitter.configs")
 
-		treesitter.setup({ install_dir = install_dir })
-		treesitter.install(opts.ensure_installed)
+		configs.setup(opts)
 
 		local enabled = {}
 		for _, lang in ipairs(opts.ensure_installed) do
@@ -42,8 +45,8 @@ return {
 				if not enabled[lang] then
 					return
 				end
-
 				if pcall(vim.treesitter.start, args.buf, lang) then
+					-- Set up fallback indenting using Treesitter engine
 					vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
 				end
 			end,

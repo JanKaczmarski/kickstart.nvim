@@ -15,6 +15,7 @@ vim.opt.rtp:prepend(lazypath)
 
 -- Load all plugin specs from lua/plugins/
 require("lazy").setup({ import = "plugins" }, {
+	rocks = { enabled = false },
 	ui = {
 		icons = vim.g.have_nerd_font and {} or {
 			cmd = "⌘",

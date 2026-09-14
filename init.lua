@@ -13,6 +13,31 @@ if not vim.uv.fs_stat(lazypath) then
 end ---@diagnostic disable-next-line: undefined-field
 vim.opt.rtp:prepend(lazypath)
 
+-- Copy using OSC 52, but do NOT query terminal for paste
+vim.g.clipboard = {
+	name = "OSC 52",
+	copy = {
+		["+"] = require("vim.ui.clipboard.osc52").copy("+"),
+		["*"] = require("vim.ui.clipboard.osc52").copy("*"),
+	},
+	paste = {
+		["+"] = function()
+			return {
+				vim.fn.split(vim.fn.getreg(""), "\n"),
+				vim.fn.getregtype(""),
+			}
+		end,
+		["*"] = function()
+			return {
+				vim.fn.split(vim.fn.getreg(""), "\n"),
+				vim.fn.getregtype(""),
+			}
+		end,
+	},
+}
+
+vim.opt.clipboard = "unnamedplus"
+
 -- Load all plugin specs from lua/plugins/
 require("lazy").setup({ import = "plugins" }, {
 	rocks = { enabled = false },
